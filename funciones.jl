@@ -213,3 +213,18 @@ function redAleatoria(N,p)
     end
     return g
 end
+
+datos = DataFrame(CSV.File("Establecimientoseconomicos.csv"))
+coordenadas = datos[!,[5,6]]
+
+function tranFase()
+    d = range(0, stop=300, step=10)
+    sol = zeros(length(d))
+    
+    for j in 1:length(d)
+        M = distanciasEnlaces(coordenadas,d[j])
+        g = Graph(M)
+        sol[j] = maximum(length.(connected_components(g)))
+    end
+    return d,sol
+end
