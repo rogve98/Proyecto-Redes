@@ -6,7 +6,7 @@ using Distances
 using Colors
 using Plots
 using LaTeXStrings
-plotlyjs()
+#plotlyjs()
 
 function distanciasCortas(g)
     N = nv(g)  
