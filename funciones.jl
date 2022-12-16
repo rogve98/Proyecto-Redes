@@ -228,3 +228,65 @@ function tranFase()
     end
     return d,sol
 end
+
+
+function Graficas(g)
+    gc = copy(g)
+    coefs_C = [global_clustering_coefficient(g)]
+    dist_cortas = [distanciaPromedioMasCorta(g)]
+    diam = [diameter(g)]
+    for i in 1:10000
+        E = collect(edges(gc))
+        i1, i2 = sample(1:length(E),2,replace=false)
+
+        n1 , n2 = E[i1].src,E[i1].dst
+        n3 , n4 = E[i2].src,E[i2].dst
+
+        if has_edge(gc,n1,n4)
+            continue
+        elseif has_edge(gc,n3,n2)
+            continue
+        end
+        rem_edge!(gc,n1,n2)
+        rem_edge!(gc,n3,n4)
+
+        add_edge!(gc,n1,n4)
+        add_edge!(gc,n3,n2)
+        if i % 100 == 0
+            push!(coefs_C,global_clustering_coefficient(gc))
+            push!(dist_cortas,distanciaPromedioMasCorta(gc))
+            push!(diam,diameter(gc))
+        end
+    end    
+    
+    grado = degree(g)
+    Max = maximum(grado)
+    y ,x = np.histogram(grado, bins = 1:Max+2)
+    x = x[1:end-1]
+    
+    gradoc = degree(gc)
+    Maxc = maximum(gradoc)
+    yc ,xc = np.histogram(gradoc, bins = 1:Maxc+2)
+    xc = xc[1:end-1]
+        
+    p1 = scatter(x,y./Max,
+        label = "Grado de la red real",
+        title = "Distribución de grado escala log-log",
+        legend=:topleft
+        )
+    scatter!(xc,yc./Max,label="Grado de la copia",
+        #markersize=2.5
+    )
+    
+    p2 = plot(coefs_C,label="",w=2)
+    scatter!(coefs_C,label="",title="Coeficientes de clustering",c="blue")
+    
+    p3 = plot(dist_cortas,w=2,label="")
+    scatter!(dist_cortas,label="",title="Distancias promedio más cortas",c="blue")
+    
+    p4 = plot(diam,w=2,label="")
+    scatter!(diam,label="",title="Diametros",c="blue")
+    
+    
+    return plot(p1,p2,p3,p4,layout=(2, 2), size=(900, 450)), gc
+end
